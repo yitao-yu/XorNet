@@ -53,18 +53,37 @@ def nettrain(train_xs, train_ys, iterations):
 
 def backprop(w,x,t):
     out,y = propagation(w,x)
-    error = out.copy()
+    error = []
+    
+    #deep copy#
+    for i in range(0,len(out)):
+        error.append([])
+        for j in range(0,len(out[i])):
+            error[i].append(out[i][j])
+    
     for i in range(0,len(error)):
         for j in range(0,len(error[i])):
-            error[i][j] = np.float64(0)
+            error[i][j] = np.float64(0.0)
+    
     for i in range(0,len(y)):
         error[len(error)-1][i] = t[i] - y[i]
     #Blame each Neuron in Hidden Layer, Using Chain Rule#
-    
-    
+    for i in range(len(error)-1, -1,-1):
+        if (i-1>=0):
+            for j in range(0,len(error[i])):
+                blame = error[i][j] * d_activation(out[i][j])
+                for k in range(0,len(error[i-1])):
+                    d_w = w[i-1][k][j]#which should be equal to the weight of that connection#
+                    error[i-1][k] += blame * d_w
     #Adjust the weight of each connection#
-    
+    print(error)
     return w
+
+def d_activation(y):#derivative for ReLu#
+    if(y>=0):
+        return 1
+    else:
+        return 0
 
 #using Relu but this can be adapted into Sigmoid or Tanh since outputs of each layer are recorded.
 def propagation(w,x):
@@ -83,7 +102,7 @@ def propagation(w,x):
             out[i][j] = np.dot(lastlayer, w[i][j])
             if(out[i][j] <= 0):
                 out[i][j] = 0
-    return out,out[(len(out)-1)]
+    return out.copy(),out[(len(out)-1)].copy()
 
 def classify(w,x):
     out,y = propagation(w,x)
