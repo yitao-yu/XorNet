@@ -143,8 +143,8 @@ def main():
     """
     train_xs, train_ys = parse_data(train_file)
     
-    weights,accuracy = nettrain(train_xs, train_ys, iterations)
-    accuracy = test_accuracy(weights, train_xs, train_ys,lr)
+    weights,accuracy = nettrain(train_xs, train_ys, iterations,lr)
+    accuracy = test_accuracy(weights, train_xs, train_ys)
     print('Train accuracy: {}'.format(accuracy))
     print('Feature weights (bias last): {}'.format(' '.join(map(str,weights))))
     
