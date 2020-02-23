@@ -41,10 +41,10 @@ def nettrain(train_xs, train_ys, iterations):
         for j in range(0,len(train_xs)):
             t = []#this is specific for this dataset#
             if(train_ys[j] == 1):
-                t = [1,0]
+                t = [1.0,0.0]
             else:
-                t = [0,1]
-            w = backprop(w,train_xs[j],t)
+                t = [0.0,1.0]
+            w = backprop(w.copy(),train_xs[j],t)
         acc = test_accuracy(w,train_xs,train_ys)
         accuracy.append(acc)
         if(acc >= 1.0000000):#converged
@@ -53,13 +53,16 @@ def nettrain(train_xs, train_ys, iterations):
 
 def backprop(w,x,t):
     out,y = propagation(w,x)
-    error = []
+    error = out.copy()
+    for i in range(0,len(error)):
+        for j in range(0,len(error[i])):
+            error[i][j] = np.float64(0)
     for i in range(0,len(y)):
-        error.append(np.float64(0))
-        error[i] = t[i] - y[i]
-    #note that dY = error#
-    #Perforn back prop!#
+        error[len(error)-1][i] = t[i] - y[i]
+    #Blame each Neuron in Hidden Layer, Using Chain Rule#
     
+    
+    #Adjust the weight of each connection#
     
     return w
 
@@ -73,9 +76,9 @@ def propagation(w,x):
     for i in range(0,len(w)):
         lastlayer = []
         if (i == 0):
-            lastlayer = x
+            lastlayer = x.copy()
         else:
-            lastlayer = out[i-1]
+            lastlayer = out[i-1].copy()
         for j in range(0,len(w[i])):
             out[i][j] = np.dot(lastlayer, w[i][j])
             if(out[i][j] <= 0):
