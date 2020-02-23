@@ -27,19 +27,21 @@ def parse_data(filename):
 # Do learning.
 def nettrain(train_xs, train_ys, iterations,learning_rate):
     #return weights#
-    w = [[[],[],[]],[[],[]]] #a two layer net will do I believe#
+    w = [[[],[]],[[],[]]] #a two layer net will do I believe#
+    #This part can be adapted to different topology#
     for i in train_xs[0]:
-        w[0][0].append(np.float64(0.01))
-        w[0][1].append(np.float64(-0.01))
-        w[0][2].append(np.float64(0.01))
+        w[0][0].append(np.float64(0.5))
+        w[0][1].append(np.float64(-0.5))
+        
         #first connection has three weights matrix#
-        w[1][0].append(np.float64(0.01))
-        w[1][1].append(np.float64(0.01))
+        w[1][0].append(np.float64(1))
+        w[1][1].append(np.float64(1))
     #training part#
     accuracy = []
+    
     for i in range(0,iterations):
         for j in range(0,len(train_xs)):
-            t = []#this is specific for this dataset#
+            t = []#this is specific for class labels of this dataset#
             if(train_ys[j] == 1):
                 t = [1.0,0.0]
             else:
@@ -54,29 +56,28 @@ def nettrain(train_xs, train_ys, iterations,learning_rate):
 def backprop(w,x,t,lr):
     out,y = propagation(w,x)
     error = []
-    
     #deep copy#
     for i in range(0,len(out)):
         error.append([])
-        for j in range(0,len(out[i])):
+        for j in range(0,len(y)):
             error[i].append(out[i][j])
-    
     for i in range(0,len(error)):
         for j in range(0,len(error[i])):
             error[i][j] = np.float64(0.0)
     
     for i in range(0,len(y)):
-        error[len(error)-1][i] = t[i] - y[i]
+        error[len(error)-1][i] = y[i] - t[i]#Loss#
     #Blame each Neuron in Hidden Layer, Using Chain Rule#
-    for i in range(len(error)-1, -1,-1):
+    for i in range(len(error)-1, -1,-1):#index for layer
         if (i-1>=0):
-            for j in range(0,len(error[i])):
+            for j in range(0,len(error[i])):#index for neuron in this layer
                 blame = error[i][j] * d_activation(out[i][j])
-                for k in range(0,len(error[i-1])):
+                for k in range(0,len(error[i-1])):#index for input neuron from last layer
                     d_w = w[i-1][k][j]#which should be equal to the weight of that connection#
                     error[i-1][k] += blame * d_w
-    #Adjust the weight of each connection#
-    
+    #Adjust the weight of each connection using gradient descent#
+    #for each blame in the error; blame them to each connection to the last layer#
+    #basically what should happens: d_blame/d_w = x#
     return w
 
 def d_activation(y):#derivative for ReLu#
@@ -102,6 +103,8 @@ def propagation(w,x):
             out[i][j] = np.dot(lastlayer, w[i][j])
             if(out[i][j] <= 0):
                 out[i][j] = 0
+        if(i<(len(out)-1)):
+            out[i].append(1.0)
     return out.copy(),out[(len(out)-1)].copy()
 
 def classify(w,x):
@@ -132,9 +135,9 @@ def main():
     
     args = parser.parse_args()
     
-    train_file = "C:/Users/yyu56/Desktop/XorNet/data/xorSmoke.dat"
-    iterations = 10
-    lr = 0.1
+    train_file = "C:/Users/yyu56/Desktop/XorNet-master/data/xorSmoke.dat"
+    iterations = 1
+    lr = 0.01
     """
     At this point, args has the following fields:
 
