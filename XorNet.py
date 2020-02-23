@@ -25,7 +25,7 @@ def parse_data(filename):
         return xs, ys
 
 # Do learning.
-def nettrain(train_xs, train_ys, iterations):
+def nettrain(train_xs, train_ys, iterations,learning_rate):
     #return weights#
     w = [[[],[],[]],[[],[]]] #a two layer net will do I believe#
     for i in train_xs[0]:
@@ -44,14 +44,14 @@ def nettrain(train_xs, train_ys, iterations):
                 t = [1.0,0.0]
             else:
                 t = [0.0,1.0]
-            w = backprop(w.copy(),train_xs[j],t)
+            w = backprop(w.copy(),train_xs[j],t,learning_rate)
         acc = test_accuracy(w,train_xs,train_ys)
         accuracy.append(acc)
         if(acc >= 1.0000000):#converged
             return w,accuracy
     return w,accuracy
 
-def backprop(w,x,t):
+def backprop(w,x,t,lr):
     out,y = propagation(w,x)
     error = []
     
@@ -76,7 +76,7 @@ def backprop(w,x,t):
                     d_w = w[i-1][k][j]#which should be equal to the weight of that connection#
                     error[i-1][k] += blame * d_w
     #Adjust the weight of each connection#
-    print(error)
+    
     return w
 
 def d_activation(y):#derivative for ReLu#
@@ -128,11 +128,13 @@ def main():
     parser = argparse.ArgumentParser(description='Basic perceptron algorithm.')
     parser.add_argument('--iterations', type=int, default=50, help='Number of iterations through the full training data to perform.')
     parser.add_argument('--train_file', type=str, default=None, help='Training data file.')
+    parser.add_argument('--learning_rate', type=float, default=None, help='Training data file.')
     
     args = parser.parse_args()
     
     train_file = "C:/Users/yyu56/Desktop/XorNet/data/xorSmoke.dat"
     iterations = 10
+    lr = 0.1
     """
     At this point, args has the following fields:
 
@@ -142,7 +144,7 @@ def main():
     train_xs, train_ys = parse_data(train_file)
     
     weights,accuracy = nettrain(train_xs, train_ys, iterations)
-    accuracy = test_accuracy(weights, train_xs, train_ys)
+    accuracy = test_accuracy(weights, train_xs, train_ys,lr)
     print('Train accuracy: {}'.format(accuracy))
     print('Feature weights (bias last): {}'.format(' '.join(map(str,weights))))
     
